@@ -80,6 +80,5 @@ npm start
 Author
 Anubhab
 GitHub: @Anubhab-del
-X: @DASHX_24
-Built in Bengaluru, January 2026
-Made with ❤️ for learning full-stack development
+Made for learning full-stack development in Collaboration with AlmaBetter
+
