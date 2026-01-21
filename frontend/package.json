@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
   "start": "webpack serve --mode development --open --hot --port 3000",
-  "build": "npx webpack --mode production"
+  "build": "npx webpack --mode production",
+  "postinstall": "chmod +x node_modules/.bin/webpack"
 },
   "dependencies": {
     "react": "^18.3.1",
@@ -21,4 +22,5 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0"
   }
+  
 }
