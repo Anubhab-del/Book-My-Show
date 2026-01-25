@@ -39,9 +39,9 @@ function App() {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
-  // Load last booking once on mount
+  // Load last booking once on mount (now using live backend URL)
   useEffect(() => {
-    fetch('/api/booking')
+    fetch('https://book-my-show-backend.onrender.com/api/booking')  // ← Changed to live backend
       .then(res => res.json())
       .then(data => {
         if (data.message) {
@@ -127,7 +127,7 @@ function App() {
     };
 
     try {
-      const response = await fetch('/api/booking', {
+      const response = await fetch('https://book-my-show-backend.onrender.com/api/booking', {  // ← Changed to live backend
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData)
