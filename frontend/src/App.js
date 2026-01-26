@@ -12,8 +12,15 @@ const slots = ["10:00 AM", "01:00 PM", "03:00 PM", "08:00 PM"];
 
 const seatTypes = ["A1", "A2", "A3", "A4", "D1", "D2"];
 
+// Automatically choose the correct API URL
+// - Local: uses relative /api (webpack proxy to localhost:8080)
+// - Live on Vercel: uses your Render backend URL
+const API_URL = window.location.hostname === 'localhost' 
+  ? '/api/booking' 
+  : 'https://book-my-show-backend.onrender.com/api/booking';  // ← Change this if your Render URL is different
+
 function App() {
-  // Existing states
+  // States
   const [selectedMovie, setSelectedMovie] = useState(localStorage.getItem('movie') || '');
   const [selectedSlot, setSelectedSlot] = useState(localStorage.getItem('slot') || '');
   const [seats, setSeats] = useState(
@@ -22,26 +29,22 @@ function App() {
     }
   );
   const [lastBooking, setLastBooking] = useState(null);
-
-  // States for existing features
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
   });
   const [showSeatError, setShowSeatError] = useState(false);
-
-  // New state for countdown
   const [countdown, setCountdown] = useState('');
 
-  // Dark mode effect
+  // Dark mode toggle (saved in localStorage)
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
-  // Load last booking once on mount (now using live backend URL)
+  // Load last booking on mount (works locally and live)
   useEffect(() => {
-    fetch('https://book-my-show-backend.onrender.com/api/booking')  // ← Changed to live backend
+    fetch(API_URL)
       .then(res => res.json())
       .then(data => {
         if (data.message) {
@@ -54,17 +57,9 @@ function App() {
   }, []);
 
   // Save selections to localStorage
-  useEffect(() => {
-    localStorage.setItem('movie', selectedMovie);
-  }, [selectedMovie]);
-
-  useEffect(() => {
-    localStorage.setItem('slot', selectedSlot);
-  }, [selectedSlot]);
-
-  useEffect(() => {
-    localStorage.setItem('seats', JSON.stringify(seats));
-  }, [seats]);
+  useEffect(() => localStorage.setItem('movie', selectedMovie), [selectedMovie]);
+  useEffect(() => localStorage.setItem('slot', selectedSlot), [selectedSlot]);
+  useEffect(() => localStorage.setItem('seats', JSON.stringify(seats)), [seats]);
 
   // Countdown to showtime (updates every minute)
   useEffect(() => {
@@ -83,9 +78,7 @@ function App() {
 
       const showTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
 
-      if (showTime < now) {
-        showTime.setDate(showTime.getDate() + 1);
-      }
+      if (showTime < now) showTime.setDate(showTime.getDate() + 1);
 
       const diffMs = showTime - now;
       const hoursLeft = Math.floor(diffMs / (1000 * 60 * 60));
@@ -101,8 +94,7 @@ function App() {
     };
 
     updateCountdown();
-    const interval = setInterval(updateCountdown, 60000); // every minute
-
+    const interval = setInterval(updateCountdown, 60000);
     return () => clearInterval(interval);
   }, [selectedSlot]);
 
@@ -127,7 +119,7 @@ function App() {
     };
 
     try {
-      const response = await fetch('https://book-my-show-backend.onrender.com/api/booking', {  // ← Changed to live backend
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData)
@@ -211,7 +203,7 @@ function App() {
             ))}
           </div>
 
-          {/* Countdown to selected slot */}
+          {/* Countdown */}
           {selectedSlot && countdown && (
             <p style={{
               marginTop: '12px',
@@ -316,7 +308,6 @@ function App() {
               <p>slot: {lastBooking.slot}</p>
               <p>movie: {lastBooking.movie}</p>
 
-              {/* Quick Book Again Button */}
               <button
                 onClick={() => {
                   setSelectedMovie(lastBooking.movie);
